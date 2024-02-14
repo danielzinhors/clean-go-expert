@@ -34,3 +34,17 @@ func (r *OrderRepository) GetTotal() (int, error) {
 	}
 	return total, nil
 }
+
+func (r *OrderRepository) FindAll(page, limit int, sort string) ([]entity.Order, error) {
+	var orders []entity.Order
+	var err error
+	if sort != "" && sort != "asc" && sort != "desc" {
+		sort = "asc"
+	}
+	if page != 0 && limit != 0 {
+		err = r.Db.QueryRow("Select * from orders order by id ? limit ? offset ? ", sort, limit, page).Scan(&orders)
+	} else {
+		err = r.Db.QueryRow("Select * from orders order by id ? ", sort).Scan(&orders)
+	}
+	return orders, err
+}

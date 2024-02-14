@@ -59,3 +59,11 @@ func (c *CreateOrderUseCase) Execute(input OrderInputDTO) (OrderOutputDTO, error
 
 	return dto, nil
 }
+
+func (c *CreateOrderUseCase) FindAll(page, limit int, sort string) ([]OrderOutputDTO, error) {
+	orders, err := c.OrderRepository.FindAll(page, limit, sort)
+	if err != nil {
+		return nil, err
+	}
+	return orders, err
+}

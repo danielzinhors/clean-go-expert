@@ -35,6 +35,12 @@ func main() {
 	}
 	defer db.Close()
 
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS orders (id varchar(255) NOT NULL, price float NOT NULL, tax float NOT NULL, final_price float NOT NULL, PRIMARY KEY (id))")
+
+	if err != nil {
+		panic(err)
+	}
+
 	rabbitMQChannel := getRabbitMQChannel()
 
 	eventDispatcher := events.NewEventDispatcher()
@@ -47,6 +53,7 @@ func main() {
 	webserver := webserver.NewWebServer(configs.WebServerPort)
 	webOrderHandler := NewWebOrderHandler(db, eventDispatcher)
 	webserver.AddHandler("/order", webOrderHandler.Create)
+	webserver.AddHandler("/orders", webOrderHandler.GetOrders)
 	fmt.Println("Starting web server on port", configs.WebServerPort)
 	go webserver.Start()
 
