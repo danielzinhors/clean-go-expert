@@ -3,7 +3,6 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/danielzinhors/clean-go-expert/internal/entity"
 	"github.com/danielzinhors/clean-go-expert/internal/usecase"
@@ -50,25 +49,15 @@ func (h *WebOrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WebOrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
-	page := r.URL.Query().Get("page")
-	limit := r.URL.Query().Get("limit")
-
-	pageInt, err := strconv.Atoi(page)
+	listOrder := usecase.NewListOrdersUseCase(h.OrderRepository)
+	output, err := listOrder.Execute()
 	if err != nil {
-		pageInt = 0
-	}
-	limitInt, err := strconv.Atoi(limit)
-	if err != nil {
-		limitInt = 0
-	}
-	sort := r.URL.Query().Get("sort")
-
-	products, err := h.OrderRepository.FindAll(pageInt, limitInt, sort)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(products)
+	err = json.NewEncoder(w).Encode(output)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

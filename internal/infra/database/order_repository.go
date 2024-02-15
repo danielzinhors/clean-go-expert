@@ -26,25 +26,23 @@ func (r *OrderRepository) Save(order *entity.Order) error {
 	return nil
 }
 
-func (r *OrderRepository) GetTotal() (int, error) {
-	var total int
-	err := r.Db.QueryRow("Select count(*) from orders").Scan(&total)
+func (r *OrderRepository) FindAll() ([]*entity.Order, error) {
+	var orders []*entity.Order
+	rows, err := r.Db.Query("Select * from orders")
 	if err != nil {
-		return 0, err
+		if err == sql.ErrNoRows {
+			return []*entity.Order{}, nil
+		}
+		return nil, err
 	}
-	return total, nil
-}
-
-func (r *OrderRepository) FindAll(page, limit int, sort string) ([]entity.Order, error) {
-	var orders []entity.Order
-	var err error
-	if sort != "" && sort != "asc" && sort != "desc" {
-		sort = "asc"
+	defer rows.Close()
+	for rows.Next() {
+		var order entity.Order
+		err := rows.Scan(&order.ID, &order.Price, &order.Tax, &order.FinalPrice)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, &order)
 	}
-	if page != 0 && limit != 0 {
-		err = r.Db.QueryRow("Select * from orders order by id ? limit ? offset ? ", sort, limit, page).Scan(&orders)
-	} else {
-		err = r.Db.QueryRow("Select * from orders order by id ? ", sort).Scan(&orders)
-	}
-	return orders, err
+	return orders, nil
 }
