@@ -15,7 +15,7 @@ type OrdersOutputDTO struct {
 	FinalPrice float64 `json:"final_price"`
 }
 
-func NewListOrdersUseCase(
+func NewGetOrdersUseCase(
 	orderRepository entity.OrderRepositoryInterface,
 ) *OrdersUseCase {
 	return &OrdersUseCase{
