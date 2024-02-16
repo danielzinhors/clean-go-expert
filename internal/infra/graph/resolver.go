@@ -12,4 +12,5 @@ import "github.com/danielzinhors/clean-go-expert/internal/usecase"
 
 type Resolver struct {
 	CreateOrderUseCase usecase.CreateOrderUseCase
+	ListOrdersUseCase  usecase.OrdersUseCase
 }
